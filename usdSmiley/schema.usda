@@ -1,0 +1,46 @@
+#usda 1.0
+(
+    "This file describes the USD Smiley schema for code generation."
+    subLayers = [
+        @usdGeom/schema.usda@
+    ]
+)
+
+over "GLOBAL" (
+    customData = {
+        string libraryName       = "usdSmiley"
+        string libraryPath       = "pxr/usd/usdSmiley"
+        dictionary libraryTokens = {
+
+        }
+    }
+){
+}
+
+class Smiley "Smiley" (
+    inherits = </Boundable>
+    doc = """A very simple example prim type representing a smiley face.
+
+    It is drawn by the UsdImaging 2.0 adapter as two triangle meshes (for the
+    eyes) and a basis curve (for the mouth), procedurally generated from the
+    attributes below.
+    """
+    customData = {
+
+    }
+){
+    double smiley:eyeSize = 0.3 (
+        doc = """Size of the smiley's eye triangles, from 0 (no eyes) to
+        1 (largest). Values are clamped to [0, 1]."""
+    )
+    double smiley:smile = 1.0 (
+        doc = """Shape of the smiley's mouth. 0 is a frown, 0.5 is a
+        horizontal line, and 1 is a proper smile. Values are clamped
+        to [0, 1]."""
+    )
+    rel smiley:target (
+        doc = """Optional single-target relationship. When set to a
+        UsdGeomSphere, the smiley face is drawn at that sphere's
+        location instead of at this prim's own transform."""
+    )
+}

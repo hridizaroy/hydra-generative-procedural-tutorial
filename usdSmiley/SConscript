@@ -1,0 +1,27 @@
+Import('mfb')
+
+mfb.BeginPackage()
+
+libraries = '''
+               pxr/usd/usd
+               pxr/usd/usdGeom
+               '''
+mfb.Libraries(libraries)
+
+mfb.SystemLibraries('''
+                       ''')
+
+mfb.PublicHeaders('''
+    api.h
+    ''')
+
+mfb.PythonLibraryFiles('''
+                    __init__.py
+                    ''')
+
+mfb.BuildGeneratedUsdSchemaCode()
+
+mfb.ValidateGeneratedUsdSchemaCode()
+
+
+mfb.EndPackage()
