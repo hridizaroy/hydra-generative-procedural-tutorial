@@ -1,0 +1,35 @@
+Import('mfb')
+
+mfb.BeginPackage(
+    owner=["tools-team-internals@pixar.com"],
+    description='Defines a UsdImaging 2.0 adapter for the Smiley schema')
+
+mfb.Libraries('''
+    pxr/base/gf
+    pxr/base/tf
+    pxr/imaging/hd
+    pxr/imaging/hdGp
+    pxr/usd/usd
+    pxr/usd/usdGeom
+    pxr/usd/usdSmiley
+    pxr/usdImaging/usdImaging
+    ''')
+
+mfb.PublicClasses('''
+    smileyAdapter
+    tokens
+    ''')
+
+mfb.PublicHeaders('''
+    api.h
+    ''')
+
+mfb.PrivateClasses('''
+    smileyProcedural
+    ''')
+
+mfb.ResourceFiles('''
+    plugInfo.json
+    ''')
+
+mfb.EndPackage()
