@@ -15,6 +15,12 @@ class Smiley "Smiley" (
         extent of the authored gprim in its own local space (i.e."""
         }
     )
+    double eyeSize = 0.3 (
+        customData = {
+            string userDocBrief = """Size of the smiley's eye triangles, from 0 (no eyes) to
+        1 (largest)."""
+        }
+    )
     rel proxyPrim (
         customData = {
             string userDocBrief = '''The proxyPrim relationship allows us to link a
@@ -30,18 +36,12 @@ class Smiley "Smiley" (
         on a stage, such as rendering or bounding-box computation traversals."""
         }
     )
-    double smiley:eyeSize = 0.3 (
-        customData = {
-            string userDocBrief = """Size of the smiley's eye triangles, from 0 (no eyes) to
-        1 (largest)."""
-        }
-    )
-    double smiley:smile = 1 (
+    double smile = 1 (
         customData = {
             string userDocBrief = "Shape of the smiley's mouth."
         }
     )
-    rel smiley:target (
+    rel target (
         customData = {
             string userDocBrief = "Optional single-target relationship."
         }

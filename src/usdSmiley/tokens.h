@@ -17,7 +17,7 @@
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 #include "pxr/pxr.h"
-#include "pxr/usd/usdSmiley/api.h"
+#include "./api.h"
 #include "pxr/base/tf/staticData.h"
 #include "pxr/base/tf/token.h"
 #include <vector>
@@ -41,22 +41,22 @@ PXR_NAMESPACE_OPEN_SCOPE
 /// Use UsdSmileyTokens like so:
 ///
 /// \code
-///     gprim.GetMyTokenValuedAttr().Set(UsdSmileyTokens->smileyEyeSize);
+///     gprim.GetMyTokenValuedAttr().Set(UsdSmileyTokens->eyeSize);
 /// \endcode
 struct UsdSmileyTokensType {
     USDSMILEY_API UsdSmileyTokensType();
-    /// \brief "smiley:eyeSize"
+    /// \brief "eyeSize"
     /// 
     /// UsdSmileySmiley
-    const TfToken smileyEyeSize;
-    /// \brief "smiley:smile"
+    const TfToken eyeSize;
+    /// \brief "smile"
     /// 
     /// UsdSmileySmiley
-    const TfToken smileySmile;
-    /// \brief "smiley:target"
+    const TfToken smile;
+    /// \brief "target"
     /// 
     /// UsdSmileySmiley
-    const TfToken smileyTarget;
+    const TfToken target;
     /// \brief "Smiley"
     /// 
     /// Schema identifer and family for UsdSmileySmiley

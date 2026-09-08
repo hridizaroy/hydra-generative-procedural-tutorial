@@ -1,20 +1,21 @@
 #usda 1.0
 (
     defaultPrim = "grinner"
+    upAxis = "Z"
 )
 
 def Smiley "grinner"
 {
-    double smiley:eyeSize = 0.3
-    double smiley:smile = 1.0
+    double eyeSize = 0.3
+    double smile = 1.0
 }
 
 def Smiley "flatline" (
     doc = "A second smiley with smile = 0.5, a horizontal-line mouth."
 )
 {
-    double smiley:eyeSize = 0.3
-    double smiley:smile = 0.3
+    double eyeSize = 0.3
+    double smile = 0.3
     double3 xformOp:translate = (2, 0, 0)
     uniform token[] xformOpOrder = ["xformOp:translate"]
 }
@@ -23,8 +24,8 @@ def Smiley "sourpuss" (
     doc = "A third smiley with smile = 0, a frown, and smaller eyes."
 )
 {
-    double smiley:eyeSize = 0.15
-    double smiley:smile = 0.0
+    double eyeSize = 0.15
+    double smile = 0.0
     double3 xformOp:translate = (4, 0, 0)
     uniform token[] xformOpOrder = ["xformOp:translate"]
 }
@@ -63,7 +64,7 @@ def Sphere "targetSphereD" (
 }
 
 def Smiley "anchored" (
-    doc = """Smiley anchored onto a sphere via smiley:target. Switch the
+    doc = """Smiley anchored onto a sphere via target. Switch the
     'target' variant in usdview's variant editor to retarget between
     targetSphereA/B/C/D."""
     variantSets = ["target"]
@@ -72,23 +73,23 @@ def Smiley "anchored" (
     }
 )
 {
-    double smiley:eyeSize = 0.3
-    double smiley:smile = 1.0
+    double eyeSize = 0.3
+    double smile = 1.0
 
     color3f[] primvars:displayColor = [(1, 0, 0)]
 
     variantSet "target" = {
         "SphereA" {
-            add rel smiley:target = </targetSphereA>
+            add rel target = </targetSphereA>
         }
         "SphereB" {
-            add rel smiley:target = </targetSphereB>
+            add rel target = </targetSphereB>
         }
         "SphereC" {
-            add rel smiley:target = </targetSphereC>
+            add rel target = </targetSphereC>
         }
         "SphereD" {
-            add rel smiley:target = </targetSphereD>
+            add rel target = </targetSphereD>
         }
     }
 }

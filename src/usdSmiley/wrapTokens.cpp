@@ -6,7 +6,7 @@
 //
 // GENERATED FILE.  DO NOT EDIT.
 #include "pxr/external/boost/python/class.hpp"
-#include "pxr/usd/usdSmiley/tokens.h"
+#include "./tokens.h"
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -17,8 +17,8 @@ void wrapUsdSmileyTokens()
 {
     pxr_boost::python::class_<UsdSmileyTokensType, pxr_boost::python::noncopyable>
         cls("Tokens", pxr_boost::python::no_init);
-    _ADD_TOKEN(cls, smileyEyeSize);
-    _ADD_TOKEN(cls, smileySmile);
-    _ADD_TOKEN(cls, smileyTarget);
+    _ADD_TOKEN(cls, eyeSize);
+    _ADD_TOKEN(cls, smile);
+    _ADD_TOKEN(cls, target);
     _ADD_TOKEN(cls, Smiley);
 }

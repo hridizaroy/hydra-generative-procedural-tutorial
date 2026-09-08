@@ -18,9 +18,9 @@ PXR_NAMESPACE_OPEN_SCOPE
 /// A prim adapter that generates a simple smiley face for Smiley prims.
 ///
 /// Draws two triangle meshes for the eyes and one basis curve for the
-/// mouth. The eyes are scaled by the value of the 'smiley:eyeSize'
+/// mouth. The eyes are scaled by the value of the 'eyeSize'
 /// attribute, and the shape of the mouth curve is determined by the value
-/// of the 'smiley:smile' attribute: 0 is a frown, 0.5 is a horizontal
+/// of the 'smile' attribute: 0 is a frown, 0.5 is a horizontal
 /// line, and 1 is a smile.
 ///
 class UsdImagingSmileyAdapter : public UsdImagingSceneIndexPrimAdapter

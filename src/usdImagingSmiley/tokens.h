@@ -11,7 +11,7 @@
 
 #include "pxr/pxr.h"
 
-#include "pxr/usdImaging/usdImagingSmiley/api.h"
+#include "api.h"
 
 #include "pxr/base/tf/staticTokens.h"
 
@@ -21,9 +21,9 @@ PXR_NAMESPACE_OPEN_SCOPE
     (leftEye)                                                                 \
     (rightEye)                                                                \
     (mouth)                                                                   \
-    ((smileyEyeSize, "smiley:eyeSize"))                                       \
-    ((smileySmile, "smiley:smile"))                                           \
-    ((smileyTarget, "smiley:target"))                                         \
+    ((smileyEyeSize, "eyeSize"))                                       \
+    ((smileySmile, "smile"))                                           \
+    ((smileyTarget, "target"))                                         \
     ((smileyProceduralType, "SmileyGp"))
 
 TF_DECLARE_PUBLIC_TOKENS(

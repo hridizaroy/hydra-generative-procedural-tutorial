@@ -10,11 +10,11 @@
 /// \file usdSmiley/smiley.h
 
 #include "pxr/pxr.h"
-#include "pxr/usd/usdSmiley/api.h"
+#include "./api.h"
 #include "pxr/usd/usdGeom/boundable.h"
 #include "pxr/usd/usd/prim.h"
 #include "pxr/usd/usd/stage.h"
-#include "pxr/usd/usdSmiley/tokens.h"
+#include "./tokens.h"
 
 #include "pxr/base/vt/value.h"
 
@@ -138,30 +138,30 @@ private:
 
 public:
     // --------------------------------------------------------------------- //
-    // SMILEYEYESIZE 
+    // EYESIZE 
     // --------------------------------------------------------------------- //
     /// Size of the smiley's eye triangles, from 0 (no eyes) to
     /// 1 (largest). Values are clamped to [0, 1].
     ///
     /// | ||
     /// | -- | -- |
-    /// | Declaration | `double smiley:eyeSize = 0.3` |
+    /// | Declaration | `double eyeSize = 0.3` |
     /// | C++ Type | double |
     /// | \ref Usd_Datatypes "Usd Type" | SdfValueTypeNames->Double |
     USDSMILEY_API
-    UsdAttribute GetSmileyEyeSizeAttr() const;
+    UsdAttribute GetEyeSizeAttr() const;
 
-    /// See GetSmileyEyeSizeAttr(), and also 
+    /// See GetEyeSizeAttr(), and also 
     /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
     /// If specified, author \p defaultValue as the attribute's default,
     /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
     /// the default for \p writeSparsely is \c false.
     USDSMILEY_API
-    UsdAttribute CreateSmileyEyeSizeAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
+    UsdAttribute CreateEyeSizeAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
 
 public:
     // --------------------------------------------------------------------- //
-    // SMILEYSMILE 
+    // SMILE 
     // --------------------------------------------------------------------- //
     /// Shape of the smiley's mouth. 0 is a frown, 0.5 is a
     /// horizontal line, and 1 is a proper smile. Values are clamped
@@ -169,35 +169,35 @@ public:
     ///
     /// | ||
     /// | -- | -- |
-    /// | Declaration | `double smiley:smile = 1` |
+    /// | Declaration | `double smile = 1` |
     /// | C++ Type | double |
     /// | \ref Usd_Datatypes "Usd Type" | SdfValueTypeNames->Double |
     USDSMILEY_API
-    UsdAttribute GetSmileySmileAttr() const;
+    UsdAttribute GetSmileAttr() const;
 
-    /// See GetSmileySmileAttr(), and also 
+    /// See GetSmileAttr(), and also 
     /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
     /// If specified, author \p defaultValue as the attribute's default,
     /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
     /// the default for \p writeSparsely is \c false.
     USDSMILEY_API
-    UsdAttribute CreateSmileySmileAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
+    UsdAttribute CreateSmileAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
 
 public:
     // --------------------------------------------------------------------- //
-    // SMILEYTARGET 
+    // TARGET 
     // --------------------------------------------------------------------- //
     /// Optional single-target relationship. When set to a
     /// UsdGeomSphere, the smiley face is drawn at that sphere's
     /// location instead of at this prim's own transform.
     ///
     USDSMILEY_API
-    UsdRelationship GetSmileyTargetRel() const;
+    UsdRelationship GetTargetRel() const;
 
-    /// See GetSmileyTargetRel(), and also 
+    /// See GetTargetRel(), and also 
     /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create
     USDSMILEY_API
-    UsdRelationship CreateSmileyTargetRel() const;
+    UsdRelationship CreateTargetRel() const;
 
 public:
     // ===================================================================== //

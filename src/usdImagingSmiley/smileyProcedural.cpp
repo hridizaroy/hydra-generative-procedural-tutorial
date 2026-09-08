@@ -4,9 +4,9 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#include "pxr/usdImaging/usdImagingSmiley/smileyProcedural.h"
+#include "smileyProcedural.h"
 
-#include "pxr/usdImaging/usdImagingSmiley/tokens.h"
+#include "tokens.h"
 
 #include "pxr/base/gf/math.h"
 #include "pxr/base/gf/matrix4d.h"
@@ -30,8 +30,6 @@
 #include "pxr/imaging/hd/xformSchema.h"
 #include "pxr/imaging/hdGp/generativeProceduralPlugin.h"
 #include "pxr/imaging/hdGp/generativeProceduralPluginRegistry.h"
-
-#include <iostream>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -268,7 +266,7 @@ _GetArgValue(
     return fallback;
 }
 
-// Reads the resolved 'smiley:target' relationship path (as published by
+// Reads the resolved 'target' relationship path (as published by
 // UsdImagingSmileyAdapter) off the procedural prim's own data source.
 // Returns an empty path if no single target is set.
 static SdfPath
@@ -320,7 +318,6 @@ UsdImagingSmileyProcedural::UsdImagingSmileyProcedural(
     const SdfPath& proceduralPrimPath)
     : HdGpGenerativeProcedural(proceduralPrimPath)
 {
-    std::cout << "UsdImagingSmileyProcedural()\n";
 }
 
 UsdImagingSmileyProcedural::~UsdImagingSmileyProcedural() = default;
@@ -329,9 +326,9 @@ HdGpGenerativeProcedural::DependencyMap
 UsdImagingSmileyProcedural::UpdateDependencies(
     const HdSceneIndexBaseRefPtr &inputScene)
 {
-    // smiley:eyeSize, smiley:smile, and smiley:target live on this
+    // eyeSize, smile, and target live on this
     // procedural's own prim, so no dependency declaration is needed for
-    // them. But if smiley:target is set, the anchor's xform on the target
+    // them. But if target is set, the anchor's xform on the target
     // prim is also an input: declare a dependency on it so that moving the
     // target re-cooks this procedural.
     HdGpGenerativeProcedural::DependencyMap map{};
@@ -356,7 +353,6 @@ UsdImagingSmileyProcedural::Update(
     const DependencyMap &dirtiedDependencies,
     HdSceneIndexObserver::DirtiedPrimEntries *outputDirtiedPrims)
 {
-    std::cout << "Update()\n";
     const HdSceneIndexPrim proceduralPrim =
         inputScene->GetPrim(_GetProceduralPrimPath());
 
@@ -368,8 +364,8 @@ UsdImagingSmileyProcedural::Update(
     // The anchor transform that the generated children need to bake into
     // their own matrices: as synthesized prims, they never pass through the
     // flattening that composes ancestor transforms for prims authored on the
-    // stage. If smiley:target is set, anchor at that prim's (local) xform
-    // instead of the procedural prim's own; smiley:eyeSize/smiley:smile
+    // stage. If target is set, anchor at that prim's (local) xform
+    // instead of the procedural prim's own; eyeSize/smile
     // still control the face shape independently of the anchor.
     const SdfPath targetPath = _GetTargetPath(proceduralPrim.dataSource);
     GfMatrix4d proceduralXform(1.0);
@@ -430,7 +426,6 @@ UsdImagingSmileyProcedural::Update(
         }
     }
 
-    std::cout << "End of Update()\n";
     return {
         {leftEyePath, HdPrimTypeTokens->mesh},
         {rightEyePath, HdPrimTypeTokens->mesh},
@@ -490,7 +485,6 @@ public:
     HdGpGenerativeProcedural *Construct(
         const SdfPath &proceduralPrimPath) override
     {
-        std::cout << "UsdImagingSmileyProceduralPlugin::Construct()\n";
         return new UsdImagingSmileyProcedural(proceduralPrimPath);
     }
 };

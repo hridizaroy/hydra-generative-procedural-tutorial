@@ -4,11 +4,11 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#include "pxr/usdImaging/usdImagingSmiley/smileyAdapter.h"
+#include "smileyAdapter.h"
 
-#include "pxr/usdImaging/usdImagingSmiley/tokens.h"
+#include "tokens.h"
 
-#include "pxr/usd/usdSmiley/smiley.h"
+#include "usdsmileygenproc/usdSmiley/smiley.h"
 #include "pxr/usd/usd/relationship.h"
 
 #include "pxr/base/tf/diagnostic.h"
@@ -56,7 +56,7 @@ UsdImagingSmileyAdapter::GetImagingSubprimType(
 }
 
 // Publishes this prim as a generative procedural (see
-// UsdImagingSmileyProcedural), passing 'smiley:eyeSize' and 'smiley:smile'
+// UsdImagingSmileyProcedural), passing 'eyeSize' and 'smile'
 // through as plain data source values for the procedural to read.
 HdContainerDataSourceHandle
 UsdImagingSmileyAdapter::GetImagingSubprimData(
@@ -84,7 +84,7 @@ UsdImagingSmileyAdapter::GetImagingSubprimData(
     };
 
     SdfPathVector targets;
-    UsdSmileySmiley(prim).GetSmileyTargetRel().GetForwardedTargets(&targets);
+    UsdSmileySmiley(prim).GetTargetRel().GetForwardedTargets(&targets);
     const VtArray<SdfPath> targetArray(targets.begin(), targets.end());
 
     return HdOverlayContainerDataSource::New(

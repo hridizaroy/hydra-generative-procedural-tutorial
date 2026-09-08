@@ -4,19 +4,19 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#include "pxr/usd/usdSmiley/tokens.h"
+#include "./tokens.h"
 
 PXR_NAMESPACE_OPEN_SCOPE
 
 UsdSmileyTokensType::UsdSmileyTokensType() :
-    smileyEyeSize("smiley:eyeSize", TfToken::Immortal),
-    smileySmile("smiley:smile", TfToken::Immortal),
-    smileyTarget("smiley:target", TfToken::Immortal),
+    eyeSize("eyeSize", TfToken::Immortal),
+    smile("smile", TfToken::Immortal),
+    target("target", TfToken::Immortal),
     Smiley("Smiley", TfToken::Immortal),
     allTokens({
-        smileyEyeSize,
-        smileySmile,
-        smileyTarget,
+        eyeSize,
+        smile,
+        target,
         Smiley
     })
 {

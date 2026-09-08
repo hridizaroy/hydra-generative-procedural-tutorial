@@ -4,7 +4,7 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#include "pxr/usd/usdSmiley/smiley.h"
+#include "./smiley.h"
 #include "pxr/usd/usd/schemaBase.h"
 
 #include "pxr/usd/sdf/primSpec.h"
@@ -33,16 +33,16 @@ WRAP_CUSTOM;
 
         
 static UsdAttribute
-_CreateSmileyEyeSizeAttr(UsdSmileySmiley &self,
+_CreateEyeSizeAttr(UsdSmileySmiley &self,
                                       object defaultVal, bool writeSparsely) {
-    return self.CreateSmileyEyeSizeAttr(
+    return self.CreateEyeSizeAttr(
         UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Double), writeSparsely);
 }
         
 static UsdAttribute
-_CreateSmileySmileAttr(UsdSmileySmiley &self,
+_CreateSmileAttr(UsdSmileySmiley &self,
                                       object defaultVal, bool writeSparsely) {
-    return self.CreateSmileySmileAttr(
+    return self.CreateSmileAttr(
         UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Double), writeSparsely);
 }
 
@@ -88,25 +88,25 @@ void wrapUsdSmileySmiley()
         .def(!self)
 
         
-        .def("GetSmileyEyeSizeAttr",
-             &This::GetSmileyEyeSizeAttr)
-        .def("CreateSmileyEyeSizeAttr",
-             &_CreateSmileyEyeSizeAttr,
+        .def("GetEyeSizeAttr",
+             &This::GetEyeSizeAttr)
+        .def("CreateEyeSizeAttr",
+             &_CreateEyeSizeAttr,
              (arg("defaultValue")=object(),
               arg("writeSparsely")=false))
         
-        .def("GetSmileySmileAttr",
-             &This::GetSmileySmileAttr)
-        .def("CreateSmileySmileAttr",
-             &_CreateSmileySmileAttr,
+        .def("GetSmileAttr",
+             &This::GetSmileAttr)
+        .def("CreateSmileAttr",
+             &_CreateSmileAttr,
              (arg("defaultValue")=object(),
               arg("writeSparsely")=false))
 
         
-        .def("GetSmileyTargetRel",
-             &This::GetSmileyTargetRel)
-        .def("CreateSmileyTargetRel",
-             &This::CreateSmileyTargetRel)
+        .def("GetTargetRel",
+             &This::GetTargetRel)
+        .def("CreateTargetRel",
+             &This::CreateTargetRel)
         .def("__repr__", ::_Repr)
     ;
 

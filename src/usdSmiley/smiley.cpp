@@ -4,7 +4,7 @@
 // Licensed under the terms set forth in the LICENSE.txt file available at
 // https://openusd.org/license.
 //
-#include "pxr/usd/usdSmiley/smiley.h"
+#include "./smiley.h"
 #include "pxr/usd/usd/schemaRegistry.h"
 #include "pxr/usd/usd/typed.h"
 
@@ -87,15 +87,15 @@ UsdSmileySmiley::_GetTfType() const
 }
 
 UsdAttribute
-UsdSmileySmiley::GetSmileyEyeSizeAttr() const
+UsdSmileySmiley::GetEyeSizeAttr() const
 {
-    return GetPrim().GetAttribute(UsdSmileyTokens->smileyEyeSize);
+    return GetPrim().GetAttribute(UsdSmileyTokens->eyeSize);
 }
 
 UsdAttribute
-UsdSmileySmiley::CreateSmileyEyeSizeAttr(VtValue const &defaultValue, bool writeSparsely) const
+UsdSmileySmiley::CreateEyeSizeAttr(VtValue const &defaultValue, bool writeSparsely) const
 {
-    return UsdSchemaBase::_CreateAttr(UsdSmileyTokens->smileyEyeSize,
+    return UsdSchemaBase::_CreateAttr(UsdSmileyTokens->eyeSize,
                        SdfValueTypeNames->Double,
                        /* custom = */ false,
                        SdfVariabilityVarying,
@@ -104,15 +104,15 @@ UsdSmileySmiley::CreateSmileyEyeSizeAttr(VtValue const &defaultValue, bool write
 }
 
 UsdAttribute
-UsdSmileySmiley::GetSmileySmileAttr() const
+UsdSmileySmiley::GetSmileAttr() const
 {
-    return GetPrim().GetAttribute(UsdSmileyTokens->smileySmile);
+    return GetPrim().GetAttribute(UsdSmileyTokens->smile);
 }
 
 UsdAttribute
-UsdSmileySmiley::CreateSmileySmileAttr(VtValue const &defaultValue, bool writeSparsely) const
+UsdSmileySmiley::CreateSmileAttr(VtValue const &defaultValue, bool writeSparsely) const
 {
-    return UsdSchemaBase::_CreateAttr(UsdSmileyTokens->smileySmile,
+    return UsdSchemaBase::_CreateAttr(UsdSmileyTokens->smile,
                        SdfValueTypeNames->Double,
                        /* custom = */ false,
                        SdfVariabilityVarying,
@@ -121,15 +121,15 @@ UsdSmileySmiley::CreateSmileySmileAttr(VtValue const &defaultValue, bool writeSp
 }
 
 UsdRelationship
-UsdSmileySmiley::GetSmileyTargetRel() const
+UsdSmileySmiley::GetTargetRel() const
 {
-    return GetPrim().GetRelationship(UsdSmileyTokens->smileyTarget);
+    return GetPrim().GetRelationship(UsdSmileyTokens->target);
 }
 
 UsdRelationship
-UsdSmileySmiley::CreateSmileyTargetRel() const
+UsdSmileySmiley::CreateTargetRel() const
 {
-    return GetPrim().CreateRelationship(UsdSmileyTokens->smileyTarget,
+    return GetPrim().CreateRelationship(UsdSmileyTokens->target,
                        /* custom = */ false);
 }
 
@@ -150,8 +150,8 @@ const TfTokenVector&
 UsdSmileySmiley::GetSchemaAttributeNames(bool includeInherited)
 {
     static TfTokenVector localNames = {
-        UsdSmileyTokens->smileyEyeSize,
-        UsdSmileyTokens->smileySmile,
+        UsdSmileyTokens->eyeSize,
+        UsdSmileyTokens->smile,
     };
     static TfTokenVector allNames =
         _ConcatenateAttributeNames(

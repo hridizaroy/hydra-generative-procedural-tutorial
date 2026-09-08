@@ -25,8 +25,8 @@ PXR_NAMESPACE_OPEN_SCOPE
 ///
 /// This performs the same work that UsdImagingSmileyAdapter used to perform
 /// directly as subprims; the adapter now instead publishes a
-/// generativeProcedural prim (carrying the 'smiley:eyeSize' and
-/// 'smiley:smile' values) that this class is invoked to resolve.
+/// generativeProcedural prim (carrying the 'eyeSize' and
+/// 'smile' values) that this class is invoked to resolve.
 class UsdImagingSmileyProcedural : public HdGpGenerativeProcedural
 {
 public:
