@@ -6,6 +6,9 @@
 //
 #include "smileyMeshGenerator.h"
 
+#include <chrono>
+#include <thread>
+
 #include "pxr/base/gf/vec3f.h"
 #include "pxr/base/vt/array.h"
 #include "pxr/imaging/hd/basisCurvesSchema.h"
@@ -245,6 +248,7 @@ SmileyMeshGenerator::BuildLeftEyePrim(
     double eyeSize, const GfMatrix4d &xform,
     const VtVec3fArray &color, const SdfPath &originPath)
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     return {HdPrimTypeTokens->mesh,
             HdOverlayContainerDataSource::New(
                 _BuildPrimOriginDs(originPath),
@@ -256,6 +260,7 @@ SmileyMeshGenerator::BuildRightEyePrim(
     double eyeSize, const GfMatrix4d &xform,
     const VtVec3fArray &color, const SdfPath &originPath)
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
     return {HdPrimTypeTokens->mesh,
             HdOverlayContainerDataSource::New(
                 _BuildPrimOriginDs(originPath),
@@ -267,6 +272,7 @@ SmileyMeshGenerator::BuildMouthPrim(
     double smile, const GfMatrix4d &xform,
     const VtVec3fArray &color, const SdfPath &originPath)
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     return {HdPrimTypeTokens->basisCurves,
             HdOverlayContainerDataSource::New(
                 _BuildPrimOriginDs(originPath),

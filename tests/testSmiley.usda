@@ -1,17 +1,33 @@
 #usda 1.0
 (
     defaultPrim = "grinner"
+    endTimeCode = 96
+    startTimeCode = 1
+    timeCodesPerSecond = 24
     upAxis = "Z"
 )
 
+# --- Animated smiley: smile oscillates frown→smile, eyeSize pulses.
+# Drives repeated async recooks — watch eyes and mouth appear at different
+# times because their threads finish ~150 ms apart.
 def Smiley "grinner"
 {
-    double eyeSize = 0.3
-    double smile = 1.0
+    double eyeSize.timeSamples = {
+         1: 0.30,
+        24: 0.10,
+        48: 0.40,
+        72: 0.10,
+        96: 0.30
+    }
+    double smile.timeSamples = {
+         1: 1.0,
+        48: 0.0,
+        96: 1.0
+    }
 }
 
 def Smiley "flatline" (
-    doc = "A second smiley with smile = 0.5, a horizontal-line mouth."
+    doc = "smile = 0.3 (nearly flat mouth), static."
 )
 {
     double eyeSize = 0.3
@@ -21,7 +37,7 @@ def Smiley "flatline" (
 }
 
 def Smiley "sourpuss" (
-    doc = "A third smiley with smile = 0, a frown, and smaller eyes."
+    doc = "smile = 0, a frown, with smaller eyes, static."
 )
 {
     double eyeSize = 0.15
@@ -30,10 +46,38 @@ def Smiley "sourpuss" (
     uniform token[] xformOpOrder = ["xformOp:translate"]
 }
 
+# --- Wanderer: translates across the scene while its smile flips.
+# A second independent animated procedural to show multiple async cooks
+# in flight simultaneously.
+def Smiley "wanderer"
+{
+    double eyeSize = 0.25
+    double smile.timeSamples = {
+         1: 0.0,
+        48: 1.0,
+        96: 0.0
+    }
+    double3 xformOp:translate.timeSamples = {
+         1: (-2,  0, 0),
+        48: ( 6,  0, 0),
+        96: (-2,  0, 0)
+    }
+    uniform token[] xformOpOrder = ["xformOp:translate"]
+    color3f[] primvars:displayColor = [(0.2, 0.5, 0.9)]
+}
+
+# --- Target spheres for the anchored-face demo.
 def Sphere "targetSphereA"
 {
     double radius = 1.0
-    double3 xformOp:translate = (0, 10, 0)
+    # Bounces up and down to exercise anchor-xform recomputation each frame.
+    double3 xformOp:translate.timeSamples = {
+         1: (0, 10, 0),
+        24: (0, 10, 1),
+        48: (0, 10, 0),
+        72: (0, 10, -1),
+        96: (0, 10, 0)
+    }
     uniform token[] xformOpOrder = ["xformOp:translate"]
 }
 
@@ -52,9 +96,7 @@ def Sphere "targetSphereC"
 }
 
 def Sphere "targetSphereD" (
-    doc = """Non-uniformly scaled sphere, to exercise the anchor xform
-    composition when the target's local matrix isn't a pure rotation +
-    translation."""
+    doc = "Non-uniformly scaled sphere, exercises anchor xform with scale."
 )
 {
     double radius = 1.0
@@ -63,10 +105,9 @@ def Sphere "targetSphereD" (
     uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
 }
 
+# --- Anchored face: sticks to a sphere via the 'target' rel.
+# Switch the 'target' variant in usdview to retarget between spheres.
 def Smiley "anchored" (
-    doc = """Smiley anchored onto a sphere via target. Switch the
-    'target' variant in usdview's variant editor to retarget between
-    targetSphereA/B/C/D."""
     variantSets = ["target"]
     variants = {
         string target = "SphereA"
@@ -75,21 +116,31 @@ def Smiley "anchored" (
 {
     double eyeSize = 0.3
     double smile = 1.0
-
     color3f[] primvars:displayColor = [(1, 0, 0)]
 
     variantSet "target" = {
-        "SphereA" {
-            add rel target = </targetSphereA>
-        }
-        "SphereB" {
-            add rel target = </targetSphereB>
-        }
-        "SphereC" {
-            add rel target = </targetSphereC>
-        }
-        "SphereD" {
-            add rel target = </targetSphereD>
-        }
+        "SphereA" { add rel target = </targetSphereA> }
+        "SphereB" { add rel target = </targetSphereB> }
+        "SphereC" { add rel target = </targetSphereC> }
+        "SphereD" { add rel target = </targetSphereD> }
     }
+}
+
+# --- Lighting and camera so the scene opens correctly in usdview.
+def DistantLight "Sun"
+{
+    float inputs:intensity = 2.0
+    float inputs:angle = 0.5
+    float3 xformOp:rotateXYZ = (45, 30, 0)
+    uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+}
+
+def Camera "MainCamera"
+{
+    float2 clippingRange = (0.1, 1000)
+    float focalLength = 35
+    float horizontalAperture = 36
+    double3 xformOp:translate = (3, -10, 3)
+    float3 xformOp:rotateXYZ = (75, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
 }
