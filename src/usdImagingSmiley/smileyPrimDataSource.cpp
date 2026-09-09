@@ -11,6 +11,7 @@
 #include "usdsmileygenproc/usdSmiley/smiley.h"
 
 #include "pxr/base/tf/token.h"
+#include "pxr/imaging/hd/overlayContainerDataSource.h"
 #include "pxr/imaging/hd/primvarSchema.h"
 #include "pxr/imaging/hd/primvarsSchema.h"
 #include "pxr/imaging/hd/retainedDataSource.h"
@@ -67,7 +68,20 @@ SmileyPrimDataSource::Get(const TfToken &name)
                         HdPrimvarSchemaTokens->constant))
                 .Build()
         };
-        return HdPrimvarsSchema::BuildRetained(1, procTypeTokens, procTypeValues);
+        // Overlay our proceduralType primvar on top of the base prim's
+        // primvars so that USD-authored primvars (e.g. displayColor) are
+        // preserved alongside it.
+        const HdContainerDataSourceHandle procTypePrimvars =
+            HdPrimvarsSchema::BuildRetained(1, procTypeTokens, procTypeValues);
+        const HdContainerDataSourceHandle basePrimvars =
+            HdContainerDataSource::Cast(
+                UsdImagingDataSourcePrim::New(
+                    _prim.GetPath(), _prim, _stageGlobals)
+                        ->Get(HdPrimvarsSchema::GetSchemaToken()));
+        if (basePrimvars) {
+            return HdOverlayContainerDataSource::New(procTypePrimvars, basePrimvars);
+        }
+        return procTypePrimvars;
     }
 
     if (name == UsdImagingSmileyTokens->smileyEyeSize) {

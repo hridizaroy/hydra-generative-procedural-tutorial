@@ -114,10 +114,11 @@ UsdImagingSmileyProcedural::UsdImagingSmileyProcedural(
 
 UsdImagingSmileyProcedural::~UsdImagingSmileyProcedural()
 {
-    _cancelRequested.store(true);
-    // Mesh generation is fast; block briefly so threads don't outlive this.
-    if (_eyeFuture.valid())   _eyeFuture.wait();
-    if (_mouthFuture.valid()) _mouthFuture.wait();
+    // Cancel in-flight work and join current threads.  Old detached threads
+    // already hold their own cancel flag copy and will exit on their own.
+    _cancelFlag->store(true);
+    if (_eyeThread.joinable())   _eyeThread.join();
+    if (_mouthThread.joinable()) _mouthThread.join();
 }
 
 HdGpGenerativeProcedural::DependencyMap
@@ -230,39 +231,43 @@ UsdImagingSmileyProcedural::Update(
 
     if (_asyncEnabled) {
         if (argsChanged) {
-            // Cancel any in-flight work, wait for it, then relaunch.
-            _cancelRequested.store(true);
-            if (_eyeFuture.valid())   _eyeFuture.wait();
-            if (_mouthFuture.valid()) _mouthFuture.wait();
-            _cancelRequested.store(false);
+            // Signal old threads to abandon their results, then detach them.
+            // We do NOT wait — this is the key to real-time frame scrubbing.
+            // Each thread holds a shared_ptr to its own cancel flag, so
+            // detaching is safe even if this procedural is later destroyed.
+            _cancelFlag->store(true);
+            if (_eyeThread.joinable())   _eyeThread.detach();
+            if (_mouthThread.joinable()) _mouthThread.detach();
+
+            // Fresh cancel flag and cook slot for this invocation.
+            auto cancelFlag = std::make_shared<std::atomic<bool>>(false);
+            _cancelFlag = cancelFlag;
+            auto cook = std::make_shared<_PendingCook>();
+            _pendingCook = cook;
 
             const SdfPath originPath = _GetProceduralPrimPath();
 
-            _eyeFuture = std::async(std::launch::async,
-                [eyeSize, proceduralXform, displayColor,
-                 originPath, &cancel = _cancelRequested]()
-                    -> _EyeResult
+            _eyeThread = std::thread(
+                [cook, cancelFlag, eyeSize, proceduralXform, displayColor,
+                 originPath]()
                 {
-                    if (cancel.load()) return {};
-                    _EyeResult result;
-                    result.leftEye  = SmileyMeshGenerator::BuildLeftEyePrim(
+                    if (cancelFlag->load()) return;
+                    cook->leftEye = SmileyMeshGenerator::BuildLeftEyePrim(
                         eyeSize, proceduralXform, displayColor, originPath);
-                    if (cancel.load()) return {};
-                    result.rightEye = SmileyMeshGenerator::BuildRightEyePrim(
+                    if (cancelFlag->load()) return;
+                    cook->rightEye = SmileyMeshGenerator::BuildRightEyePrim(
                         eyeSize, proceduralXform, displayColor, originPath);
-                    return result;
+                    cook->eyesDone.store(true);
                 });
 
-            _mouthFuture = std::async(std::launch::async,
-                [smile, proceduralXform, displayColor,
-                 originPath, &cancel = _cancelRequested]()
-                    -> _MouthResult
+            _mouthThread = std::thread(
+                [cook, cancelFlag, smile, proceduralXform, displayColor,
+                 originPath]()
                 {
-                    if (cancel.load()) return {};
-                    _MouthResult result;
-                    result.mouth = SmileyMeshGenerator::BuildMouthPrim(
+                    if (cancelFlag->load()) return;
+                    cook->mouth = SmileyMeshGenerator::BuildMouthPrim(
                         smile, proceduralXform, displayColor, originPath);
-                    return result;
+                    cook->mouthDone.store(true);
                 });
         }
         return previousResult;
@@ -346,8 +351,8 @@ UsdImagingSmileyProcedural::AsyncUpdate(
     ChildPrimTypeMap *outputPrimTypes,
     HdSceneIndexObserver::DirtiedPrimEntries *outputDirtiedPrims)
 {
-    // No in-flight work at all.
-    if (!_eyeFuture.valid() && !_mouthFuture.valid()) {
+    const auto cook = _pendingCook;
+    if (!cook) {
         return AsyncState::Finished;
     }
 
@@ -356,20 +361,19 @@ UsdImagingSmileyProcedural::AsyncUpdate(
     const SdfPath rightEyePath = proc.AppendChild(UsdImagingSmileyTokens->rightEye);
     const SdfPath mouthPath    = proc.AppendChild(UsdImagingSmileyTokens->mouth);
 
-    bool anyNewResults = false;
+    bool anyNew = false;
 
-    // Commit the eye thread's result as soon as it's ready, independently of
-    // the mouth thread — this is what ContinuingWithNewChanges enables.
-    if (_eyeFuture.valid() &&
-        _eyeFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-        _EyeResult eyes = _eyeFuture.get();
+    // Commit the eye thread's result as soon as it signals done, independently
+    // of the mouth thread — this is what ContinuingWithNewChanges enables.
+    if (cook->eyesDone.load() && !cook->eyesCommitted.load()) {
         {
             std::lock_guard<std::mutex> lock(_committedMutex);
-            _committedLeftEye  = std::move(eyes.leftEye);
-            _committedRightEye = std::move(eyes.rightEye);
+            _committedLeftEye  = cook->leftEye;
+            _committedRightEye = cook->rightEye;
         }
         _hasCommittedEyes.store(true);
-        anyNewResults = true;
+        cook->eyesCommitted.store(true);
+        anyNew = true;
         if (outputDirtiedPrims) {
             outputDirtiedPrims->emplace_back(
                 leftEyePath, HdDataSourceLocatorSet::UniversalSet());
@@ -379,15 +383,14 @@ UsdImagingSmileyProcedural::AsyncUpdate(
     }
 
     // Commit the mouth thread's result independently.
-    if (_mouthFuture.valid() &&
-        _mouthFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-        _MouthResult mouth = _mouthFuture.get();
+    if (cook->mouthDone.load() && !cook->mouthCommitted.load()) {
         {
             std::lock_guard<std::mutex> lock(_committedMutex);
-            _committedMouth = std::move(mouth.mouth);
+            _committedMouth = cook->mouth;
         }
         _hasCommittedMouth.store(true);
-        anyNewResults = true;
+        cook->mouthCommitted.store(true);
+        anyNew = true;
         if (outputDirtiedPrims) {
             outputDirtiedPrims->emplace_back(
                 mouthPath, HdDataSourceLocatorSet::UniversalSet());
@@ -395,7 +398,7 @@ UsdImagingSmileyProcedural::AsyncUpdate(
     }
 
     // Populate outputPrimTypes with whatever is committed so far.
-    if (outputPrimTypes && anyNewResults) {
+    if (outputPrimTypes && anyNew) {
         if (_hasCommittedEyes.load()) {
             (*outputPrimTypes)[leftEyePath]  = HdPrimTypeTokens->mesh;
             (*outputPrimTypes)[rightEyePath] = HdPrimTypeTokens->mesh;
@@ -405,16 +408,17 @@ UsdImagingSmileyProcedural::AsyncUpdate(
         }
     }
 
-    // Still work in flight?
-    if (_eyeFuture.valid() || _mouthFuture.valid()) {
-        return anyNewResults
-            ? AsyncState::ContinuingWithNewChanges
-            : AsyncState::Continuing;
+    const bool allDone = cook->eyesDone.load() && cook->mouthDone.load();
+    if (allDone) {
+        _pendingCook = nullptr;
+        if (_eyeThread.joinable())   _eyeThread.join();
+        if (_mouthThread.joinable()) _mouthThread.join();
+        return anyNew ? AsyncState::FinishedWithNewChanges : AsyncState::Finished;
     }
 
-    return anyNewResults
-        ? AsyncState::FinishedWithNewChanges
-        : AsyncState::Finished;
+    return anyNew
+        ? AsyncState::ContinuingWithNewChanges
+        : AsyncState::Continuing;
 }
 
 class UsdImagingSmileyProceduralPlugin : public HdGpGenerativeProceduralPlugin

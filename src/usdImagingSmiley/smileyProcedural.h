@@ -21,8 +21,9 @@
 #include "pxr/usd/sdf/path.h"
 
 #include <atomic>
-#include <future>
+#include <memory>
 #include <mutex>
+#include <thread>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -71,25 +72,34 @@ private:
 
     bool _asyncEnabled{false};
 
-    // Async result types — built on background threads, committed under
-    // _committedMutex once both futures are ready.
-    struct _EyeResult {
-        HdSceneIndexPrim leftEye;
-        HdSceneIndexPrim rightEye;
-    };
-    struct _MouthResult {
-        HdSceneIndexPrim mouth;
+    // Each cook invocation gets its own slot. Threads hold a shared_ptr to
+    // their slot, so detaching a thread never causes a use-after-free even
+    // when a new cook starts before the old one finishes.
+    struct _PendingCook {
+        HdSceneIndexPrim leftEye, rightEye, mouth;
+        // Written before the corresponding Done flag (release), read after
+        // (acquire), so no additional mutex is needed on the prim data.
+        std::atomic<bool> eyesDone{false};
+        std::atomic<bool> mouthDone{false};
+        // Prevents AsyncUpdate() from re-committing on a second poll.
+        std::atomic<bool> eyesCommitted{false};
+        std::atomic<bool> mouthCommitted{false};
     };
 
-    std::future<_EyeResult>  _eyeFuture;
-    std::future<_MouthResult> _mouthFuture;
-    std::atomic<bool> _cancelRequested{false};
+    std::shared_ptr<_PendingCook> _pendingCook;
+    // Replaced on each relaunch; old threads hold their own copy and
+    // exit early when it becomes true without blocking Update().
+    std::shared_ptr<std::atomic<bool>> _cancelFlag{
+        std::make_shared<std::atomic<bool>>(false)};
+
+    std::thread _eyeThread;
+    std::thread _mouthThread;
 
     std::mutex _committedMutex;
     HdSceneIndexPrim _committedLeftEye;
     HdSceneIndexPrim _committedRightEye;
     HdSceneIndexPrim _committedMouth;
-    // Set independently as each thread finishes, so GetChildPrim() can serve
+    // Set independently as each thread commits, so GetChildPrim() can serve
     // partial results while the other thread is still running.
     std::atomic<bool> _hasCommittedEyes{false};
     std::atomic<bool> _hasCommittedMouth{false};

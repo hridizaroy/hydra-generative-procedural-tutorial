@@ -119,10 +119,18 @@ def Smiley "anchored" (
     color3f[] primvars:displayColor = [(1, 0, 0)]
 
     variantSet "target" = {
-        "SphereA" { add rel target = </targetSphereA> }
-        "SphereB" { add rel target = </targetSphereB> }
-        "SphereC" { add rel target = </targetSphereC> }
-        "SphereD" { add rel target = </targetSphereD> }
+        "SphereA" {
+            add rel target = </targetSphereA>
+        }
+        "SphereB" {
+            add rel target = </targetSphereB>
+        }
+        "SphereC" {
+            add rel target = </targetSphereC>
+        }
+        "SphereD" {
+            add rel target = </targetSphereD>
+        }
     }
 }
 
