@@ -11,11 +11,17 @@
 
 #include "pxr/pxr.h"
 
-#include "pxr/base/vt/array.h"
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/base/gf/vec3f.h"
+#include "pxr/base/tf/token.h"
+#include "pxr/base/vt/array.h"
+#include "pxr/imaging/hd/dataSource.h"
+#include "pxr/imaging/hd/sceneIndex.h"
 #include "pxr/imaging/hdGp/generativeProcedural.h"
+#include "pxr/usd/sdf/path.h"
 
+#include <atomic>
+#include <future>
 #include <mutex>
 
 PXR_NAMESPACE_OPEN_SCOPE
@@ -58,12 +64,48 @@ private:
     // per the base class contract may be called concurrently from multiple
     // threads.
     std::mutex _argsMutex;
-    double _eyeSize;
-    double _smile;
+    double _eyeSize{0.3};
+    double _smile{1.0};
     GfMatrix4d _proceduralXform{1.0};
     VtVec3fArray _displayColor{{0.1f, 0.1f, 0.1f}};
 
-    bool _asyncEnabled
+    bool _asyncEnabled{false};
+
+    // Async result types — built on background threads, committed under
+    // _committedMutex once both futures are ready.
+    struct _EyeResult {
+        HdSceneIndexPrim leftEye;
+        HdSceneIndexPrim rightEye;
+    };
+    struct _MouthResult {
+        HdSceneIndexPrim mouth;
+    };
+
+    std::future<_EyeResult>  _eyeFuture;
+    std::future<_MouthResult> _mouthFuture;
+    std::atomic<bool> _cancelRequested{false};
+
+    std::mutex _committedMutex;
+    HdSceneIndexPrim _committedLeftEye;
+    HdSceneIndexPrim _committedRightEye;
+    HdSceneIndexPrim _committedMouth;
+    // Set independently as each thread finishes, so GetChildPrim() can serve
+    // partial results while the other thread is still running.
+    std::atomic<bool> _hasCommittedEyes{false};
+    std::atomic<bool> _hasCommittedMouth{false};
+
+    // Scene-reading helpers — read inputs from the scene, do not generate geometry.
+    static double _GetArgValue(
+        const HdContainerDataSourceHandle &proceduralPrimDs,
+        const TfToken &argName,
+        double fallback);
+    static SdfPath _GetTargetPath(
+        const HdContainerDataSourceHandle &proceduralPrimDs);
+    static GfMatrix4d _GetXform(
+        const HdContainerDataSourceHandle &primDs);
+    static double _GetSphereRadius(
+        const HdContainerDataSourceHandle &primDs,
+        double fallback);
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

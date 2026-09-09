@@ -2,6 +2,8 @@ usd_plugin(usdImagingSmiley
 
     CPPFILES
         smileyAdapter.cpp
+        smileyMeshGenerator.cpp
+        smileyPrimDataSource.cpp
         smileyProcedural.cpp
         tokens.cpp
 
