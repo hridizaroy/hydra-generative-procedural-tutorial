@@ -46,15 +46,24 @@ public:
         const HdSceneIndexBaseRefPtr &inputScene,
         const SdfPath &childPrimPath) override;
 
+public: // Async API
+    bool AsyncBegin(bool asyncEnabled) override;
+    AsyncState AsyncUpdate(
+        const ChildPrimTypeMap &previousResult,
+        ChildPrimTypeMap *outputPrimTypes,
+        HdSceneIndexObserver::DirtiedPrimEntries *outputDirtiedPrims) override;
+
 private:
     // Committed args, written by Update() and read by GetChildPrim(), which
     // per the base class contract may be called concurrently from multiple
     // threads.
     std::mutex _argsMutex;
-    double _eyeSize = 0.3;
-    double _smile = 1.0;
+    double _eyeSize;
+    double _smile;
     GfMatrix4d _proceduralXform{1.0};
     VtVec3fArray _displayColor{{0.1f, 0.1f, 0.1f}};
+
+    bool _asyncEnabled
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

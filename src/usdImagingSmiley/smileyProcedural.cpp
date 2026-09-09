@@ -426,6 +426,15 @@ UsdImagingSmileyProcedural::Update(
         }
     }
 
+    // TODO:
+        // If async enabled, do not populate child prim type map
+            // Just get eyesize, smile, and target
+        // Start 2 different threads - one for the eyes, one for the smile
+        // Have async update check the status of those threads
+        // If update is called again, safely terminate those threads
+        // AsyncUpdate can simply check the result of those threads and return a 
+        // status accordingly
+
     return {
         {leftEyePath, HdPrimTypeTokens->mesh},
         {rightEyePath, HdPrimTypeTokens->mesh},
@@ -475,6 +484,22 @@ UsdImagingSmileyProcedural::GetChildPrim(
     }
 
     return {};
+}
+
+bool
+UsdImagingSmileyProcedural::AsyncBegin(bool asyncEnabled)
+{
+    _asyncEnabled = asyncEnabled;
+    return asyncEnabled;
+}
+
+AsyncState
+UsdImagingSmileyProcedural::AsyncUpdate(
+    const ChildPrimTypeMap &previousResult,
+    ChildPrimTypeMap *outputPrimTypes,
+    HdSceneIndexObserver::DirtiedPrimEntries *outputDirtiedPrims)
+{
+    
 }
 
 class UsdImagingSmileyProceduralPlugin : public HdGpGenerativeProceduralPlugin
